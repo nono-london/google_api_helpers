@@ -1,0 +1,1 @@
+https://stackoverflow.com/questions/74839142/google-sheet-api-request-had-insufficient-authentication-scopes/74956230#74956230
