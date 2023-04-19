@@ -165,8 +165,7 @@ For the tests to run properly you need to have:
   
 ### Google API
 
-* [Create Google API credentials](https://console.cloud.google.com/flows/enableapi?apiid=sheets.googleapis.com
-  )
+* [Create Google API credentials](https://console.cloud.google.com/flows/enableapi?apiid=sheets.googleapis.com)
 * [Create Google app account - stackoverflow](https://stackoverflow.com/questions/74839142/google-sheet-api-request-had-insufficient-authentication-scopes/74956230#74956230)
 * [Gmail API docs](https://developers.google.com/gmail/api/quickstart/python)
 * [Gmail API tutorial](https://skillshats.com/blogs/send-and-read-emails-with-gmail-api/)
