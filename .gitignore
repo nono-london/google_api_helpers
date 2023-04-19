@@ -12,5 +12,6 @@ google_api_helpers.egg-info
 
 .idea
 .pytest_cache
+__pycache__
 .env
 google_api_helpers/g_credentials/*
