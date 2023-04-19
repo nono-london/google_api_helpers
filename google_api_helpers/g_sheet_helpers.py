@@ -12,7 +12,7 @@ from google_api_helpers.misc_helpers import build_sheet_range
 
 
 class GSheetHandler(GAuthHandler):
-    def __init__(self, auth_scopes: List[AuthScope],
+    def __init__(self, auth_scopes: Union[List[AuthScope], None],
                  spreadsheet_id: Optional[str] = None):
         super().__init__(auth_scopes)
 

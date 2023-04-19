@@ -1,7 +1,6 @@
 """https://skillshats.com/blogs/send-and-read-emails-with-gmail-api/"""
 import base64
 import email
-import os
 from typing import (Optional, List)
 from typing import Union
 
@@ -9,12 +8,11 @@ from googleapiclient import discovery
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
 
-from google_api_helpers.app_config import load_env_variables
 from google_api_helpers.g_auth_helpers import (GAuthHandler, AuthScope)
 
 
 class GMailHandler(GAuthHandler):
-    def __init__(self, auth_scopes: List[AuthScope],
+    def __init__(self, auth_scopes: Union[List[AuthScope], None],
                  gmail_user_id: Optional[str] = None):
         super().__init__(auth_scopes)
 
@@ -73,7 +71,7 @@ class GMailHandler(GAuthHandler):
         except Exception as error:
             print('An error occurred: %s' % error)
 
-    def get_mime_message(self, msg_id:str, user_id: Optional[str] = None, ):
+    def get_mime_message(self, msg_id: str, user_id: Optional[str] = None, ):
         if user_id is None:
             user_id = self.gmail_user_id
         try:

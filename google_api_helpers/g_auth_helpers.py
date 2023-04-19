@@ -1,6 +1,6 @@
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -21,10 +21,11 @@ class AuthScope(Enum):
     GmailReadOnly = 'https://www.googleapis.com/auth/gmail.readonly'
 
 
-
 class GAuthHandler:
-    def __init__(self, auth_scopes: List[AuthScope]):
+    def __init__(self, auth_scopes: Union[List[AuthScope], None]):
         # scope
+        if not auth_scopes:
+            auth_scopes = [AuthScope.SpreadSheet, AuthScope.GmailReadOnly]
         self.auth_scopes: List[str] = [auth_scope.value for auth_scope in auth_scopes]
 
         # credentials
@@ -68,7 +69,7 @@ class GAuthHandler:
 
 
 if __name__ == '__main__':
-    gsheet_auth = GAuthHandler(auth_scopes=[ AuthScope.GmailReadOnly,
+    gsheet_auth = GAuthHandler(auth_scopes=[AuthScope.GmailReadOnly,
                                             AuthScope.SpreadSheet, AuthScope.SpreadSheetReadOnly])
     print(gsheet_auth.auth_scopes)
     print(gsheet_auth.auth_scopes)
