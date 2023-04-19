@@ -216,19 +216,7 @@ class GMailHandler(GAuthHandler):
 if __name__ == '__main__':
     gmail = GMailHandler(auth_scopes=None,
                          gmail_user_id=None)
-    my_result = gmail.get_message_ids(user_id=None)
-
-    # print(my_result)
-    my_result = gmail.get_message(msg_id="1879a4baf23a4ba3")
-    # print(my_result)
-    my_result = gmail.get_mime_message(msg_id="1879a4baf23a4ba3")
-
-    my_result = gmail.get_messages_from(sender_email="abouttrading@substack.com",
-                                        date_from=datetime(2021, 4, 1),
-                                        user_id=None)
-    print(my_result)
-    print(len(my_result))
-
     my_result = gmail.query_messages(query="trading",
-                                     # date_from=datetime(2021, 4, 1),
+                                     date_from=datetime.now() - timedelta(days=15),
                                      user_id=None)
+    print(my_result)
