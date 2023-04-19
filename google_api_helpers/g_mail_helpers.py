@@ -19,7 +19,7 @@ class GMailHandler(GAuthHandler):
         super().__init__(auth_scopes)
 
         # in case of delegate user, otherwise only manage email that has had auth
-        self.gmail_user_id = "me" if os.getenv('GMAIL_USER_ID', ) is None else os.getenv('GMAIL_USER_ID')
+        self.gmail_user_id = "me" if gmail_user_id is None else gmail_user_id
 
         # get authorization
         self.get_g_auth()
