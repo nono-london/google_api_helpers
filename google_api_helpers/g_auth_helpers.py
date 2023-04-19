@@ -12,9 +12,14 @@ from google_api_helpers.app_config import get_g_credentials_path
 class AuthScope(Enum):
     SpreadSheet = 'https://www.googleapis.com/auth/spreadsheets'
     SpreadSheetReadOnly = 'https://www.googleapis.com/auth/spreadsheets.readonly'
+
     Drive = 'https://www.googleapis.com/auth/drive'
     DriveFile = 'https://www.googleapis.com/auth/drive.file'
     DriveReadOnly = 'https://www.googleapis.com/auth/drive.readonly'
+
+    Gmail = 'https://www.googleapis.com/auth/gmail'
+    GmailReadOnly = 'https://www.googleapis.com/auth/gmail.readonly'
+
 
 
 class GAuthHandler:
@@ -63,7 +68,8 @@ class GAuthHandler:
 
 
 if __name__ == '__main__':
-    gsheet_auth = GAuthHandler(auth_scopes=[AuthScope.SpreadSheet])
+    gsheet_auth = GAuthHandler(auth_scopes=[ AuthScope.GmailReadOnly,
+                                            AuthScope.SpreadSheet, AuthScope.SpreadSheetReadOnly])
     print(gsheet_auth.auth_scopes)
     print(gsheet_auth.auth_scopes)
     print(gsheet_auth.get_g_auth())
