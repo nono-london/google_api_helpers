@@ -4,11 +4,16 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
+def load_env_variables():
+    env_path: Path = Path(get_root_full_path(), ".env")
+    if not env_path:
+        print(f"No env file found for path: {env_path}")
+        raise Exception(f".env file not found")
+    load_dotenv(env_path)
+
 
 def get_root_full_path() -> Path:
     """Return the app root folder path"""
-    # should be this, but to be checked
-    # root_dir = Path(__file__).resolve().parent.parent
     app_root_path: Path = Path().cwd().parent
     return app_root_path
 

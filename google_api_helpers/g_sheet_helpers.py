@@ -1,4 +1,4 @@
-from os import environ
+import os
 from pprint import pprint
 from typing import (Optional, List, Union, Dict)
 
@@ -21,7 +21,7 @@ class GSheetHandler(GAuthHandler):
         # if None load from .env variables
         if spreadsheet_id is None:
             load_env_variables()
-            self.spreadsheet_id = environ['G_SHEET_ID']
+            self.spreadsheet_id = os.getenv('G_SHEET_ID')
         else:
             self.spreadsheet_id = spreadsheet_id
 
@@ -280,7 +280,7 @@ class GSheetHandler(GAuthHandler):
 
 
 if __name__ == '__main__':
-    gsheet = GSheetHandler(auth_scopes=[AuthScope.Drive, AuthScope.SpreadSheet],
+    gsheet = GSheetHandler(auth_scopes=[AuthScope.Drive, AuthScope.SpreadSheet, AuthScope.SpreadSheetReadOnly],
                            spreadsheet_id=None)
     my_result = gsheet.delete_sheet(sheet_name="Sheet5")
     pprint(my_result)
