@@ -17,11 +17,10 @@ class GMailHandler(GAuthHandler):
     def __init__(self, auth_scopes: List[AuthScope],
                  gmail_user_id: Optional[str] = None):
         super().__init__(auth_scopes)
-        if gmail_user_id is None:
-            load_env_variables()
-            self.gmail_user_id = os.getenv('GMAIL_USER_ID', "me")
-        else:
-            self.gmail_user_id = gmail_user_id
+
+        # in case of delegate user, otherwise only manage email that has had auth
+        self.gmail_user_id = "me" if os.getenv('GMAIL_USER_ID', ) is None else os.getenv('GMAIL_USER_ID')
+
         # get authorization
         self.get_g_auth()
         # if None load from .env variables
