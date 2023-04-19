@@ -280,7 +280,10 @@ class GSheetHandler(GAuthHandler):
 
 
 if __name__ == '__main__':
-    gsheet = GSheetHandler(auth_scopes=[AuthScope.Drive, AuthScope.SpreadSheet, AuthScope.SpreadSheetReadOnly],
+    gsheet = GSheetHandler(auth_scopes=None,
                            spreadsheet_id=None)
+
+    my_result = gsheet.create_new_sheet(sheet_name="Sheet5")
+    pprint(my_result)
     my_result = gsheet.delete_sheet(sheet_name="Sheet5")
     pprint(my_result)
