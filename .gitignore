@@ -1,0 +1,16 @@
+.venv
+credentials.json
+token.json
+
+g_credentials.json
+g_token.json
+
+dist
+build
+
+google_api_helpers.egg-info
+
+.idea
+.pytest_cache
+.env
+google_api_helpers/g_credentials/*

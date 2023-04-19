@@ -1,0 +1,33 @@
+# handles google api
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+# pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+# data analysis and processing
+pandas
+numpy
+
+# handles .env file
+python-dotenv
+
+# test commands:
+# python setup.py pytest
+pytest
+pytest-runner
+
+# requirements for setup
+# https://medium.com/analytics-vidhya/how-to-create-a-python-library-7d5aea80cc3f
+# https://docs.python.org/3.7/distutils/setupscript.html
+# python setup.py bdist_wheel
+setuptools
+wheel
+
+
+
+# python.exe -m pip install --upgrade pip
+
+# pip install -r requirements.txt
+# pip install -r requirements.txt --upgrade
+
+# python -m venv .venv
