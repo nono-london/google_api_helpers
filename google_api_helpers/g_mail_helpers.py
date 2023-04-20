@@ -126,8 +126,8 @@ class GMailHandler(GAuthHandler):
                         text_body += part['body']['data']
                     if part['mimeType'] == 'text/html':
                         html_body += part['body']['data']
-                    if html_body != '':
-                        gmail_email.body_html = base64.urlsafe_b64decode(html_body).decode()
+                if html_body != '':
+                    gmail_email.body_html = base64.urlsafe_b64decode(html_body).decode()
             else:
                 text_body = gmail_email.payload['body']['data']
                 gmail_email.body_html = None

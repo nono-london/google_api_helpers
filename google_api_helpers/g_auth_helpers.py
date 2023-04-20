@@ -71,8 +71,7 @@ class GAuthHandler:
 
 
 if __name__ == '__main__':
-    gsheet_auth = GAuthHandler(auth_scopes=[AuthScope.GmailReadOnly,
-                                            AuthScope.SpreadSheet, AuthScope.SpreadSheetReadOnly])
+    gsheet_auth = GAuthHandler(auth_scopes=None)
     print(gsheet_auth.auth_scopes)
     print(gsheet_auth.auth_scopes)
     print(gsheet_auth.get_g_auth())
