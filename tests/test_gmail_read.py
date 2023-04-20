@@ -18,7 +18,7 @@ def test_read_message():
     print(messages)
     gmail = GMailHandler()
     message:GEmail = gmail.read_message(msg_id=messages[0].get('id'))
-    assert len(message.body) > 0
+    assert len(message.body_text) > 0 and len(message.body_html) > 0
 
 
 def test_read_message_metadata():
