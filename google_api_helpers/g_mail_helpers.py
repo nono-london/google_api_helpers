@@ -1,6 +1,5 @@
 """https://skillshats.com/blogs/send-and-read-emails-with-gmail-api/"""
 import base64
-import email
 from datetime import datetime, timedelta
 from typing import (Optional, List, Dict)
 from typing import Union
@@ -10,6 +9,15 @@ from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
 
 from google_api_helpers.g_auth_helpers import (GAuthHandler, AuthScope)
+
+
+class GEmail:
+    def __init__(self):
+        self.payload: dict = None
+        self.subject: str = None
+        self.sender: str = None
+        self.received_date: str = None
+        self.body: str = None
 
 
 class GMailHandler(GAuthHandler):
@@ -29,28 +37,6 @@ class GMailHandler(GAuthHandler):
     def _init_gmail_service(self):
         if self.gmail_service is None:
             self.gmail_service = discovery.build('gmail', 'v1', credentials=self.authorized_creds)
-
-    def read_emails(self):
-        if not any(scope.value in self.auth_scopes for scope in [AuthScope.Gmail, AuthScope.GmailReadOnly]):
-            print(f"{AuthScope.Gmail.value} or {AuthScope.GmailReadOnly.value} not in auth. scopes:\n"
-                  f"{self.auth_scopes}")
-            return None
-
-        try:
-            # Call the Gmail API
-            self._init_gmail_service()
-            results = self.gmail_service.users().labels().list(userId='me').execute()
-            labels = results.get('labels', [])
-
-            if not labels:
-                print('No labels found.')
-                return
-            print('Labels:')
-            for label in labels:
-                print(label['name'])
-
-        except HttpError as error:
-            print(f'An error occurred: {error}')
 
     def get_message_ids(self, user_id: Optional[str] = None,
                         date_from: Union[str, datetime, None] = None,
@@ -91,38 +77,55 @@ class GMailHandler(GAuthHandler):
 
         return results
 
-    def get_message(self, msg_id: str, user_id: Optional[str] = None)->Dict:
+    def get_message_metadata(self, msg_id: str, user_id: Optional[str] = None) -> Dict:
         if user_id is None:
             user_id = self.gmail_user_id
         try:
             self._init_gmail_service()
-            message:dict = self.gmail_service.users().messages().get(userId=user_id, id=msg_id, format='metadata').execute()
+            message: dict = self.gmail_service.users().messages().get(userId=user_id, id=msg_id,
+                                                                      format='metadata').execute()
 
             return message
         except Exception as error:
             print('An error occurred: %s' % error)
 
-    def get_mime_message(self, msg_id: str,
-                         user_id: Optional[str] = None, ):
-
+    def read_message(self, msg_id: str, user_id: Optional[str] = None) -> Union[GEmail, None]:
         if user_id is None:
             user_id = self.gmail_user_id
         try:
             self._init_gmail_service()
-            message = self.gmail_service.users().messages().get(userId=user_id, id=msg_id,
-                                                                format='raw').execute()
-            print('Message snippet: %s' % message['snippet'])
-            msg_str = base64.urlsafe_b64decode(message['raw'].encode("utf-8")).decode("utf-8")
-            mime_msg = email.message_from_string(msg_str)
+            message: dict = self.gmail_service.users().messages().get(userId=user_id, id=msg_id,
+                                                                      format='full').execute()
+            gmail_email = GEmail()
+            # Parse the message payload
+            gmail_email.payload = message['payload']
+            headers = gmail_email.payload['headers']
+            gmail_email.subject = next((header['value'] for header in headers if header['name'] == 'Subject'), '')
+            gmail_email.sender = next((header['value'] for header in headers if header['name'] == 'From'), '')
+            gmail_email.received_date = next((header['value'] for header in headers if header['name'] == 'Date'), '')
 
-            return mime_msg
-        except Exception as error:
-            print('An error occurred: %s' % error)
+            # Decode the message body
+            if 'parts' in gmail_email.payload:
+                parts = gmail_email.payload['parts']
+                body = ''
+                for part in parts:
+                    if part['mimeType'] == 'text/plain':
+                        body += part['body']['data']
+            else:
+                body = gmail_email.payload['body']['data']
 
-    def get_messages_from(self, sender_email: str,
-                          date_from: Union[str, datetime, None] = None,
-                          date_to: Union[str, datetime, None] = None,
-                          user_id: Optional[str] = None, ) -> Union[None, List[Dict]]:
+            gmail_email.body = base64.urlsafe_b64decode(body).decode()
+
+            return gmail_email
+
+        except HttpError as error:
+            print(f'An error occurred: {error}')
+            return None
+
+    def get_messages_ids_from(self, sender_email: str,
+                              date_from: Union[str, datetime, None] = None,
+                              date_to: Union[str, datetime, None] = None,
+                              user_id: Optional[str] = None, ) -> Union[None, List[Dict]]:
         if user_id is None:
             user_id = self.gmail_user_id
         """ date_from: needs to be formatted as %Y/%m/%d
@@ -220,5 +223,7 @@ if __name__ == '__main__':
     my_result = gmail.query_messages(query="trading",
                                      date_from=datetime.now() - timedelta(days=15),
                                      user_id=None)
-    gmail.get_message(msg_id="18794f679e62392c")
-    print(my_result)
+    my_result = gmail.read_message(msg_id="18794f679e62392c")
+    print(my_result.body)
+    print(my_result.sender)
+    print(my_result.received_date)
