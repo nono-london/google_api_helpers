@@ -91,13 +91,14 @@ class GMailHandler(GAuthHandler):
 
         return results
 
-    def get_message(self, msg_id: str, user_id: Optional[str] = None):
+    def get_message(self, msg_id: str, user_id: Optional[str] = None)->Dict:
         if user_id is None:
             user_id = self.gmail_user_id
         try:
             self._init_gmail_service()
-            messages = self.gmail_service.users().messages().get(userId=user_id, id=msg_id, format='metadata').execute()
-            return messages
+            message:dict = self.gmail_service.users().messages().get(userId=user_id, id=msg_id, format='metadata').execute()
+
+            return message
         except Exception as error:
             print('An error occurred: %s' % error)
 
@@ -219,4 +220,5 @@ if __name__ == '__main__':
     my_result = gmail.query_messages(query="trading",
                                      date_from=datetime.now() - timedelta(days=15),
                                      user_id=None)
+    gmail.get_message(msg_id="18794f679e62392c")
     print(my_result)
