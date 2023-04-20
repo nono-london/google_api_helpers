@@ -43,7 +43,9 @@ class GAuthHandler:
         creds = None
         # check that user has provided a credential file and saved it to the g_credentials folder
         if not Path.exists(self.credential_path):
-            print(f'User need to provide a credential.json file\nREADME.md file')
+            print(f'User need to provide a credential.json file\n'
+                  f'In: {self.credential_path}\n'
+                  f'README.md file')
             return False
 
         # check if used token exist
