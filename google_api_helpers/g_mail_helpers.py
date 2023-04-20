@@ -13,11 +13,21 @@ from google_api_helpers.g_auth_helpers import (GAuthHandler, AuthScope)
 
 class GEmail:
     def __init__(self):
-        self.payload: dict = None
-        self.subject: str = None
-        self.sender: str = None
-        self.received_date: str = None
-        self.body: str = None
+        self.payload: Union[None, dict] = None
+        self.subject: Union[None, str] = None
+        self.sender: Union[None, str] = None
+        self.received_date: Union[None, datetime, str] = None
+        self.body_text: Union[None, str] = None
+        self.body_html: Union[None, str] = None
+
+    def set_received_date(self, date_as_g_string):
+        try:
+            self.received_date = datetime.strptime(date_as_g_string,
+                                                   "%a, %d %b %Y %H:%M:%S %z")
+        except ValueError as ex:
+            print(f'Can not convert gmail date: {date_as_g_string}\n'
+                  f'Error: {ex}')
+            self.received_date = date_as_g_string
 
 
 class GMailHandler(GAuthHandler):
@@ -97,24 +107,32 @@ class GMailHandler(GAuthHandler):
             message: dict = self.gmail_service.users().messages().get(userId=user_id, id=msg_id,
                                                                       format='full').execute()
             gmail_email = GEmail()
+
             # Parse the message payload
             gmail_email.payload = message['payload']
             headers = gmail_email.payload['headers']
             gmail_email.subject = next((header['value'] for header in headers if header['name'] == 'Subject'), '')
             gmail_email.sender = next((header['value'] for header in headers if header['name'] == 'From'), '')
-            gmail_email.received_date = next((header['value'] for header in headers if header['name'] == 'Date'), '')
+            date_as_g_string = next((header['value'] for header in headers if header['name'] == 'Date'), '')
+            gmail_email.set_received_date(date_as_g_string=date_as_g_string)
 
             # Decode the message body
+            text_body = ''
+            html_body = ''
             if 'parts' in gmail_email.payload:
                 parts = gmail_email.payload['parts']
-                body = ''
                 for part in parts:
                     if part['mimeType'] == 'text/plain':
-                        body += part['body']['data']
+                        text_body += part['body']['data']
+                    if part['mimeType'] == 'text/html':
+                        html_body += part['body']['data']
+                    if html_body != '':
+                        gmail_email.body_html = base64.urlsafe_b64decode(html_body).decode()
             else:
-                body = gmail_email.payload['body']['data']
+                text_body = gmail_email.payload['body']['data']
+                gmail_email.body_html = None
 
-            gmail_email.body = base64.urlsafe_b64decode(body).decode()
+            gmail_email.body_text = base64.urlsafe_b64decode(text_body).decode()
 
             return gmail_email
 
@@ -224,6 +242,7 @@ if __name__ == '__main__':
                                      date_from=datetime.now() - timedelta(days=15),
                                      user_id=None)
     my_result = gmail.read_message(msg_id="18794f679e62392c")
-    print(my_result.body)
+    print(my_result.body_html)
+    print(my_result.body_text)
     print(my_result.sender)
     print(my_result.received_date)
