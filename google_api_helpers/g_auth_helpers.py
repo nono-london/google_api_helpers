@@ -1,7 +1,7 @@
 from enum import Enum
 from pathlib import Path
 from typing import List, Union
-
+from os import environ
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -30,6 +30,10 @@ class GAuthHandler:
 
         # credentials
         self.credential_folder_path: Path = get_g_credentials_path()
+        # TODO: check if that does anything
+        # https://stackoverflow.com/questions/51554341/google-auth-exceptions-defaultcredentialserror
+        environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(self.credential_folder_path)
+
         self.credential_path: Path = Path(self.credential_folder_path,
                                           f'g_credentials.json')
         self.token_path: Path = Path(self.credential_folder_path, f'g_token.json')
