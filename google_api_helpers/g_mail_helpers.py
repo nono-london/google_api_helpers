@@ -22,7 +22,7 @@ class GEmail:
 
     def set_received_date(self, date_as_g_string):
         try:
-            self.received_date = datetime.strptime(date_as_g_string,
+            self.received_date = datetime.strptime(date_as_g_string.replace(" (UTC)",""),
                                                    "%a, %d %b %Y %H:%M:%S %z")
         except ValueError as ex:
             print(f'Can not convert gmail date: {date_as_g_string}\n'
@@ -238,11 +238,12 @@ class GMailHandler(GAuthHandler):
 if __name__ == '__main__':
     gmail = GMailHandler(auth_scopes=None,
                          gmail_user_id=None)
-    my_result = gmail.query_messages(query="trading",
-                                     date_from=datetime.now() - timedelta(days=15),
-                                     user_id=None)
-    my_result = gmail.read_message(msg_id="18794f679e62392c")
+
+    my_result = gmail.read_message(msg_id="")
+    if my_result.body_html is None:
+        print(my_result.body_text)
+
     print(my_result.body_html)
-    print(my_result.body_text)
+    # print(my_result.body_text)
     print(my_result.sender)
     print(my_result.received_date)
