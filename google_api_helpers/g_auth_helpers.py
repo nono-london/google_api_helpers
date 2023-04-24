@@ -1,7 +1,8 @@
 from enum import Enum
+from os import environ
 from pathlib import Path
 from typing import List, Union
-from os import environ
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -22,14 +23,20 @@ class AuthScope(Enum):
 
 
 class GAuthHandler:
-    def __init__(self, auth_scopes: Union[List[AuthScope], None]):
+    def __init__(self, auth_scopes: Union[List[AuthScope], None],
+                 credentials_folder_path: Union[Path, str, None] = None):
         # scope
         if not auth_scopes:
             auth_scopes = [AuthScope.SpreadSheet, AuthScope.GmailReadOnly]
         self.auth_scopes: List[str] = [auth_scope.value for auth_scope in auth_scopes]
 
         # credentials
-        self.credential_folder_path: Path = get_g_credentials_path()
+        if credentials_folder_path is None:
+            self.credential_folder_path: Path = get_g_credentials_path()
+        elif isinstance(credentials_folder_path, str):
+            self.credential_folder_path: Path = Path(credentials_folder_path)
+        else:
+            self.credential_folder_path: Path = credentials_folder_path
         # TODO: check if that does anything
         # https://stackoverflow.com/questions/51554341/google-auth-exceptions-defaultcredentialserror
         environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(self.credential_folder_path)
