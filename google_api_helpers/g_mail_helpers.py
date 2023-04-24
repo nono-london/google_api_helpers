@@ -3,7 +3,7 @@ import base64
 from datetime import datetime, timedelta
 from typing import (Optional, List, Dict)
 from typing import Union
-
+from pathlib import Path
 from googleapiclient import discovery
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
@@ -32,8 +32,10 @@ class GEmail:
 
 class GMailHandler(GAuthHandler):
     def __init__(self, auth_scopes: Union[List[AuthScope], None] = None,
-                 gmail_user_id: Optional[str] = None):
-        super().__init__(auth_scopes)
+                 gmail_user_id: Optional[str] = None,
+                 credentials_folder_path: Union[Path, str, None] = None):
+
+        super().__init__(auth_scopes, credentials_folder_path)
 
         # in case of delegate user, otherwise only manage email that has had auth
         self.gmail_user_id = "me" if gmail_user_id is None else gmail_user_id

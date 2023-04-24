@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from pprint import pprint
 from typing import (Optional, List, Union, Dict)
 
@@ -13,8 +14,9 @@ from google_api_helpers.misc_helpers import build_sheet_range
 
 class GSheetHandler(GAuthHandler):
     def __init__(self, auth_scopes: Union[List[AuthScope], None],
-                 spreadsheet_id: Optional[str] = None):
-        super().__init__(auth_scopes)
+                 spreadsheet_id: Optional[str] = None,
+                 credentials_folder_path: Union[Path, str, None] = None):
+        super().__init__(auth_scopes, credentials_folder_path=credentials_folder_path)
 
         # get authorization
         self.get_g_auth()
