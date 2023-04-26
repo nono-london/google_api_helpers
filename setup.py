@@ -3,7 +3,7 @@ from setuptools import (find_packages, setup)
 setup(
     name='google_api_helpers',
     packages=find_packages(),
-    version='1.0.9',
+    version='1.0.9.1',
     description="Help using the Google API",
     author="Nono London",
     url="https://github.com/nono-london/google_api_helpers",
