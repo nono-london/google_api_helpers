@@ -53,14 +53,14 @@ class GAuthHandler:
         # check if a token has already been given
         creds = None
         # check that user has provided a credential file and saved it to the g_credentials folder
-        if not Path.exists(self.credential_path):
+        if self.credential_path.is_file():
             print(f'User need to provide a credential.json file\n'
                   f'In: {self.credential_path}\n'
                   f'README.md file')
             return False
 
         # check if used token exist
-        if Path.exists(self.token_path):
+        if self.token_path.is_file():
             creds = Credentials.from_authorized_user_file(str(self.token_path), self.auth_scopes)
 
         # If there are no (valid) credentials available, let the user log in.
