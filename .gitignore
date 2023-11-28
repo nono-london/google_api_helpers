@@ -1,17 +1,23 @@
+# venv
 .venv
-credentials.json
-token.json
+venv
+.idea
 
+# authentification
+.env
 g_credentials.json
 g_token.json
+credentials.json
+token.json
+google_api_helpers/g_credentials/*
 
+# build
 dist
 build
-
+.eggs
 google_api_helpers.egg-info
 
-.idea
+# test
 .pytest_cache
 __pycache__
-.env
-google_api_helpers/g_credentials/*
+
