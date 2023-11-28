@@ -1,9 +1,10 @@
 """https://skillshats.com/blogs/send-and-read-emails-with-gmail-api/"""
 import base64
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import (Optional, List, Dict)
 from typing import Union
-from pathlib import Path
+
 from googleapiclient import discovery
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
@@ -22,7 +23,7 @@ class GEmail:
 
     def set_received_date(self, date_as_g_string):
         try:
-            self.received_date = datetime.strptime(date_as_g_string.replace(" (UTC)",""),
+            self.received_date = datetime.strptime(date_as_g_string.replace(" (UTC)", ""),
                                                    "%a, %d %b %Y %H:%M:%S %z")
         except ValueError as ex:
             print(f'Can not convert gmail date: {date_as_g_string}\n'
@@ -84,8 +85,10 @@ class GMailHandler(GAuthHandler):
                 if message_ids and message_ids.get("messages"):
                     results.extend(message_ids['messages'])
 
-        except Exception as error:
-            print('An error occurred: %s' % error)
+        except Exception as ex:
+            print(f'Error with google_api_helpers')
+            print(f'With get_message_ids {ex.__class__.__name__}')
+            print(ex)
 
         return results
 
@@ -98,8 +101,10 @@ class GMailHandler(GAuthHandler):
                                                                       format='metadata').execute()
 
             return message
-        except Exception as error:
-            print('An error occurred: %s' % error)
+        except Exception as ex:
+            print(f'Error with google_api_helpers')
+            print(f'With get_message_metadata: {ex.__class__.__name__}')
+            print(ex)
 
     def read_message(self, msg_id: str, user_id: Optional[str] = None) -> Union[GEmail, None]:
         if user_id is None:
@@ -138,8 +143,10 @@ class GMailHandler(GAuthHandler):
 
             return gmail_email
 
-        except HttpError as error:
-            print(f'An error occurred: {error}')
+        except HttpError as ex:
+            print(f'Error with google_api_helpers')
+            print(f'With read_message: {ex.__class__.__name__}')
+            print(ex)
             return None
 
     def get_messages_ids_from(self, sender_email: str,
@@ -178,8 +185,10 @@ class GMailHandler(GAuthHandler):
                 if message_ids and message_ids.get("messages"):
                     results.extend(message_ids['messages'])
 
-        except Exception as error:
-            print('An error occurred: %s' % error)
+        except HttpError as ex:
+            print(f'Error with google_api_helpers')
+            print(f'With get_messages_ids_from: {ex.__class__.__name__}')
+            print(ex)
 
         return results
 
@@ -231,8 +240,10 @@ class GMailHandler(GAuthHandler):
                 if message_ids and message_ids.get("messages"):
                     results.extend(message_ids['messages'])
 
-        except Exception as error:
-            print('An error occurred: %s' % error)
+        except Exception as ex:
+            print(f'Error with google_api_helpers')
+            print(f'With query_messages: {ex.__class__.__name__}')
+            print(ex)
 
         return results
 
