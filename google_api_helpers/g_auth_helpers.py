@@ -3,6 +3,7 @@ from enum import Enum
 from os import environ
 from pathlib import Path
 from typing import List, Union
+from google.auth.exceptions import RefreshError
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -51,7 +52,6 @@ class GAuthHandler:
 
     def get_g_auth(self) -> bool:
         """Return True if auth to GSheet has been authorized"""
-
         # check if a token has already been given
         creds = None
         # check that user has provided a credential file and saved it to the g_credentials folder
@@ -68,11 +68,16 @@ class GAuthHandler:
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
+                try:
+                    creds.refresh(Request())
+                except RefreshError as ex:
+                    logger.debug(f'RefreshError handled: {ex}')
+                    return False
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     str(self.credential_path), self.auth_scopes)
                 creds = flow.run_local_server(port=0)
+
             # Save the credentials for the next run
             with open(self.token_path, 'w') as token:
                 token.write(creds.to_json())
