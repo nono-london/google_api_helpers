@@ -3,7 +3,7 @@ from setuptools import (find_packages, setup)
 setup(
     name='google_api_helpers',
     packages=find_packages(),
-    version='1.0.9.1',
+    version='1.0.9.2',
     description="Help using the Google API",
     author="Nono London",
     url="https://github.com/nono-london/google_api_helpers",
@@ -11,6 +11,7 @@ setup(
     install_requires=["google-api-python-client",
                       "google-auth-httplib2",
                       "google-auth-oauthlib",
+                      "oauth2client<4.0.0",
                       "pandas",
                       "numpy",
                       "python-dotenv"
