@@ -33,17 +33,15 @@ class GAuthHandler:
         # credentials
         if credentials_folder_path is None:
             self.credential_folder_path: Path = get_g_credentials_path()
-        elif isinstance(credentials_folder_path, str):
-            self.credential_folder_path: Path = Path(credentials_folder_path)
         else:
-            self.credential_folder_path: Path = credentials_folder_path
-        # TODO: check if that does anything
+            self.credential_folder_path: Path = Path(credentials_folder_path)
         # https://stackoverflow.com/questions/51554341/google-auth-exceptions-defaultcredentialserror
         environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(self.credential_folder_path)
 
         self.credential_path: Path = Path(self.credential_folder_path,
-                                          f'g_credentials.json')
-        self.token_path: Path = Path(self.credential_folder_path, f'g_token.json')
+                                          'g_credentials.json')
+        self.token_path: Path = Path(self.credential_folder_path,
+                                     'g_token.json')
 
         self.authorized_creds = None
 

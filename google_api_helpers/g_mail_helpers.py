@@ -1,15 +1,18 @@
 """https://skillshats.com/blogs/send-and-read-emails-with-gmail-api/"""
 import base64
+import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import (Optional, List, Dict)
 from typing import Union
-
+from google_api_helpers.app_config import logging_config
 from googleapiclient import discovery
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
 
 from google_api_helpers.g_auth_helpers import (GAuthHandler, AuthScope)
+
+logger = logging.getLogger(f"g_mail_helpers:{Path(__file__).name}")
 
 
 class GEmail:
@@ -26,8 +29,8 @@ class GEmail:
             self.received_date = datetime.strptime(date_as_g_string.replace(" (UTC)", ""),
                                                    "%a, %d %b %Y %H:%M:%S %z")
         except ValueError as ex:
-            print(f'Can not convert gmail date: {date_as_g_string}\n'
-                  f'Error: {ex}')
+            logger.info(f'Can not convert gmail date: {date_as_g_string}, '
+                        f'Error: {ex}')
             self.received_date = date_as_g_string
 
 
@@ -86,9 +89,9 @@ class GMailHandler(GAuthHandler):
                     results.extend(message_ids['messages'])
 
         except Exception as ex:
-            print(f'Error with google_api_helpers')
-            print(f'With get_message_ids {ex.__class__.__name__}')
-            print(ex)
+            logger.error(f'Error with google_api_helpers'
+                         f' with get_message_ids {ex.__class__.__name__}'
+                         f'Error: {ex}')
 
         return results
 
@@ -102,9 +105,9 @@ class GMailHandler(GAuthHandler):
 
             return message
         except Exception as ex:
-            print(f'Error with google_api_helpers')
-            print(f'With get_message_metadata: {ex.__class__.__name__}')
-            print(ex)
+            logger.error(f'Error with google_api_helpers. '
+                         f'With get_message_metadata: {ex.__class__.__name__}. '
+                         f'Error is: {ex}')
 
     def read_message(self, msg_id: str, user_id: Optional[str] = None) -> Union[GEmail, None]:
         if user_id is None:
@@ -144,9 +147,9 @@ class GMailHandler(GAuthHandler):
             return gmail_email
 
         except HttpError as ex:
-            print(f'Error with google_api_helpers')
-            print(f'With read_message: {ex.__class__.__name__}')
-            print(ex)
+            logger.info(f'Error with google_api_helpers. '
+                        f'With read_message: {ex.__class__.__name__}. '
+                        f'Error is: {ex}')
             return None
 
     def get_messages_ids_from(self, sender_email: str,
@@ -186,10 +189,9 @@ class GMailHandler(GAuthHandler):
                     results.extend(message_ids['messages'])
 
         except HttpError as ex:
-            print(f'Error with google_api_helpers')
-            print(f'With get_messages_ids_from: {ex.__class__.__name__}')
-            print(ex)
-
+            logger.error(f'Error with google_api_helpers. '
+                         f'With get_messages_ids_from: {ex.__class__.__name__}. '
+                         f'Error is: {ex}')
         return results
 
     def query_messages(self, query: str,
@@ -241,14 +243,16 @@ class GMailHandler(GAuthHandler):
                     results.extend(message_ids['messages'])
 
         except Exception as ex:
-            print(f'Error with google_api_helpers')
-            print(f'With query_messages: {ex.__class__.__name__}')
-            print(ex)
-
+            logger.error(f'Error with google_api_helpers. '
+                         f'With query_messages: {ex.__class__.__name__}. '
+                         f'Error is: {ex}')
         return results
 
 
 if __name__ == '__main__':
+    logging_config(log_file_name="g_mail_helpers.log",
+                   force_local_folder=True,
+                   log_level=logging.INFO)
     gmail = GMailHandler(auth_scopes=None,
                          gmail_user_id=None)
 

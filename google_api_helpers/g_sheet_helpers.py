@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 from pprint import pprint
@@ -7,9 +8,12 @@ import pandas as pd
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
 
-from google_api_helpers.app_config import load_env_variables
+from google_api_helpers.app_config import (load_env_variables,
+                                           logging_config)
 from google_api_helpers.g_auth_helpers import (GAuthHandler, AuthScope)
 from google_api_helpers.misc_helpers import build_sheet_range
+
+logger = logging.getLogger(f"g_mail_helpers:{Path(__file__).name}")
 
 
 class GSheetHandler(GAuthHandler):
@@ -30,8 +34,8 @@ class GSheetHandler(GAuthHandler):
     def get_sheet_desc(self):
         # check that we are requesting a GSheet Auth
         if AuthScope.SpreadSheet.value not in self.auth_scopes:
-            print(f"{AuthScope.SpreadSheet.value} not in auth. scopes:\n"
-                  f"{self.auth_scopes}")
+            logger.info(f"{AuthScope.SpreadSheet.value} not in auth. scopes: "
+                        f"{self.auth_scopes}")
             return False
 
         # True if grid data should be returned.
@@ -59,8 +63,8 @@ class GSheetHandler(GAuthHandler):
         range_values: Union[List[List], pd.DataFrame, None] = None
         # check that we are requesting a GSheet Auth
         if not any(scope.value in self.auth_scopes for scope in [AuthScope.SpreadSheet, AuthScope.SpreadSheetReadOnly]):
-            print(f"{AuthScope.SpreadSheet.value} or {AuthScope.SpreadSheetReadOnly.value} not in auth. scopes:\n"
-                  f"{self.auth_scopes}")
+            logger.info(f"{AuthScope.SpreadSheet.value} or {AuthScope.SpreadSheetReadOnly.value} "
+                        f"not in auth. scopes: {self.auth_scopes}")
             return range_values
 
         # The ranges to retrieve from the spreadsheet.
@@ -68,22 +72,20 @@ class GSheetHandler(GAuthHandler):
 
         try:
             service = discovery.build('sheets', 'v4', credentials=self.authorized_creds)
-
             # Call the Sheets API
             sheet = service.spreadsheets()
             result = sheet.values().get(spreadsheetId=self.spreadsheet_id,
                                         range=sheet_range_addresses).execute()
             range_values = result.get('values', [])
-
             if not range_values:
-                print('No data found.')
+                logger.info('No data found.')
                 if as_dataframe:
                     return pd.DataFrame()
                 else:
                     return []
 
         except HttpError as err:
-            print(err)
+            logger.info(f'HttpError handled: {err}')
             return range_values
 
         if as_dataframe:
@@ -102,13 +104,13 @@ class GSheetHandler(GAuthHandler):
 
         # check that we have the rights to modify the GSheet
         if AuthScope.SpreadSheet.value not in self.auth_scopes:
-            print(f"{AuthScope.SpreadSheet.value} not in auth. scopes:\n"
-                  f"{self.auth_scopes}")
+            logger.info(f"{AuthScope.SpreadSheet.value} not in auth. scopes: "
+                        f"{self.auth_scopes}")
             return -1
 
         # set sheet_range_address
         if sheet_range is None and sheet_start_cell is None:
-            print(f'sheet_range and sheet_start_cell can not be None at the same time')
+            logger.info(f'sheet_range and sheet_start_cell can not be None at the same time')
             return -1
         elif sheet_start_cell is not None:
             sheet_range = build_sheet_range(range_values=sheet_new_values,
@@ -129,8 +131,8 @@ class GSheetHandler(GAuthHandler):
 
             updated_cells = result.get('updatedCells')
 
-        except HttpError as error:
-            print(f"An error occurred: {error}")
+        except HttpError as err:
+            logger.info(f'HttpError handled: {err}')
 
         return updated_cells
 
@@ -145,8 +147,8 @@ class GSheetHandler(GAuthHandler):
         if not any(scope.value in self.auth_scopes for scope in [AuthScope.SpreadSheet,
                                                                  AuthScope.Drive,
                                                                  AuthScope.DriveFile]):
-            print(f"{AuthScope.SpreadSheet.value} or {AuthScope.SpreadSheetReadOnly.value} not in auth. scopes:\n"
-                  f"{self.auth_scopes}")
+            logger.info(f"{AuthScope.SpreadSheet.value} or {AuthScope.SpreadSheetReadOnly.value} "
+                        f"not in auth. scopes: {self.auth_scopes}")
             return None
 
         # The ranges to retrieve from the spreadsheet.
@@ -166,8 +168,8 @@ class GSheetHandler(GAuthHandler):
                                                             body=clear_values_request_body)
             response = request.execute()
 
-        except HttpError as error:
-            print(f"An error occurred: {error}")
+        except HttpError as err:
+            logger.info(f'HttpError handled: {err}')
             return None
 
         return response.get("clearedRange")
@@ -180,8 +182,8 @@ class GSheetHandler(GAuthHandler):
         if not any(scope.value in self.auth_scopes for scope in [AuthScope.SpreadSheet,
                                                                  AuthScope.Drive,
                                                                  ]):
-            print(f"{AuthScope.Drive.value} or {AuthScope.SpreadSheet.value} not in auth. scopes:\n"
-                  f"{self.auth_scopes}")
+            logger.info(f"{AuthScope.Drive.value} or {AuthScope.SpreadSheet.value} not in auth. "
+                        f"scopes: {self.auth_scopes}")
             return None
 
         try:
@@ -194,10 +196,10 @@ class GSheetHandler(GAuthHandler):
             spreadsheet = service.spreadsheets().create(body=spreadsheet,
                                                         fields="spreadsheetId") \
                 .execute()
-            print(f"Spreadsheet ID: {(spreadsheet.get('spreadsheetId'))}")
+            logger.info(f"Spreadsheet ID: {(spreadsheet.get('spreadsheetId'))}")
             return spreadsheet.get('spreadsheetId')
         except HttpError as error:
-            print(f"An error occurred: {error}")
+            logger.error(f"An error occurred: {error}")
             return None
 
     def create_new_sheet(self, sheet_name: str) -> Union[Dict, None]:
@@ -205,8 +207,8 @@ class GSheetHandler(GAuthHandler):
         # check that we have the rights to modify/Create the GSheet
         if not any(scope.value in self.auth_scopes for scope in [AuthScope.SpreadSheet,
                                                                  ]):
-            print(f"{AuthScope.SpreadSheet.value} not in auth. scopes:\n"
-                  f"{self.auth_scopes}")
+            logger.info(f"{AuthScope.SpreadSheet.value} not in auth. scopes:\n"
+                        f"{self.auth_scopes}")
             return None
 
         try:
@@ -227,10 +229,8 @@ class GSheetHandler(GAuthHandler):
             response = service.spreadsheets().batchUpdate(
                 spreadsheetId=self.spreadsheet_id, body=batch_update_request).execute()
             return response.get("replies")[0].get("addSheet").get("properties")
-        except HttpError as error:
-
-            print(f"An error occurred: {error}")
-
+        except HttpError as err:
+            logger.info(f'HttpError handled: {err}')
             return None
 
     def delete_sheet(self, sheet_name: Optional[str] = None, sheet_id: Optional[int] = -1) -> Union[Dict, None]:
@@ -238,8 +238,8 @@ class GSheetHandler(GAuthHandler):
         # check that we have the rights to modify/Create the GSheet
         if not any(scope.value in self.auth_scopes for scope in [AuthScope.SpreadSheet,
                                                                  ]):
-            print(f"{AuthScope.SpreadSheet.value} not in auth. scopes:\n"
-                  f"{self.auth_scopes}")
+            logger.info(f"{AuthScope.SpreadSheet.value} not in auth. scopes: "
+                        f"{self.auth_scopes}")
             return None
 
         # get sheet id
@@ -250,8 +250,8 @@ class GSheetHandler(GAuthHandler):
                 if sheet.get("title").upper() == sheet_name.upper():
                     sheet_id = sheet.get("sheetId")
             if sheet_id == -1:
-                print(f"Error {sheet_name} was not found in workbook sheets:\n"
-                      f"{spreadsheet_desc}")
+                logger.info(f"Error {sheet_name} was not found in workbook sheets: "
+                            f"{spreadsheet_desc}")
                 return None
 
         # Create a DeleteSheetRequest object
@@ -273,15 +273,18 @@ class GSheetHandler(GAuthHandler):
             response = service.spreadsheets().batchUpdate(
                 spreadsheetId=self.spreadsheet_id, body=batch_update_request).execute()
 
-            print('Sheet deleted successfully!')
+            logger.info('Sheet deleted successfully!')
             return response
 
-        except HttpError as error:
-            print(f'An error occurred: {error}')
+        except HttpError as err:
+            logger.info(f'HttpError handled: {err}')
             return None
 
 
 if __name__ == '__main__':
+    logging_config(log_file_name="g_mail_helpers.log",
+                   force_local_folder=True,
+                   log_level=logging.INFO)
     gsheet = GSheetHandler(auth_scopes=None,
                            spreadsheet_id=None)
 
