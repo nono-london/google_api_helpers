@@ -5,11 +5,12 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import (Optional, List, Dict)
 from typing import Union
-from google_api_helpers.app_config import logging_config
+
 from googleapiclient import discovery
 from googleapiclient.discovery import Resource
 from googleapiclient.errors import HttpError
 
+from google_api_helpers.app_config import logging_config
 from google_api_helpers.g_auth_helpers import (GAuthHandler, AuthScope)
 
 logger = logging.getLogger(f"g_mail_helpers:{Path(__file__).name}")

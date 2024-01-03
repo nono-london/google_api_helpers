@@ -282,7 +282,7 @@ class GSheetHandler(GAuthHandler):
 
 
 if __name__ == '__main__':
-    logging_config(log_file_name="g_mail_helpers.log",
+    logging_config(log_file_name="g_sheet_helpers.log",
                    force_local_folder=True,
                    log_level=logging.INFO)
     gsheet = GSheetHandler(auth_scopes=None,

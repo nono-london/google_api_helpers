@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 from os import environ
 from pathlib import Path
@@ -8,6 +9,9 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from google_api_helpers.app_config import get_g_credentials_path
+from google_api_helpers.app_config import (logging_config)
+
+logger = logging.getLogger(f"g_auth_helpers:{Path(__file__).name}")
 
 
 class AuthScope(Enum):
@@ -52,9 +56,9 @@ class GAuthHandler:
         creds = None
         # check that user has provided a credential file and saved it to the g_credentials folder
         if not self.credential_path.is_file():
-            print(f'User need to provide a credential.json file\n'
-                  f'In: {self.credential_path}\n'
-                  f'README.md file')
+            logger.info(f'User need to provide a credential.json file. '
+                        f'In: {self.credential_path}. '
+                        f'README.md file')
             return False
 
         # check if used token exist
@@ -80,6 +84,10 @@ class GAuthHandler:
 
 
 if __name__ == '__main__':
+    logging_config(log_file_name="g_auth_helpers.log",
+                   force_local_folder=True,
+                   log_level=logging.INFO)
+
     gsheet_auth = GAuthHandler(auth_scopes=None)
     print(gsheet_auth.auth_scopes)
     print(gsheet_auth.auth_scopes)
