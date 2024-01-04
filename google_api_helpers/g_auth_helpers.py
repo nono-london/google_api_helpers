@@ -81,9 +81,9 @@ class GAuthHandler:
             # Save the credentials for the next run
             with open(self.token_path, 'w') as token:
                 token.write(creds.to_json())
-        else:
-            # print('Valid credentials')
-            self.authorized_creds = creds
+
+        # save the credentials
+        self.authorized_creds = creds
 
         return True
 
